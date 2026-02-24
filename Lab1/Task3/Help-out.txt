@@ -1,0 +1,5 @@
+Program for inverting 3x3 matrix
+Usage:
+  program.exe -h        - show help
+  program.exe           - input matrix from console
+  program.exe <file>    - read matrix from file

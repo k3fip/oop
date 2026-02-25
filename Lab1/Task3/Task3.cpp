@@ -7,15 +7,12 @@
 #include <cmath>
 #include <iomanip>
 #include <limits>
-#include <cerrno>
 #include <cfenv>
 
 const int ORDER = 3;
 
 using Matrix3x3 = std::array<std::array<float, ORDER>, ORDER>;
 using Matrix2x2 = std::array<std::array<float, 2>, 2>;
-
-#pragma STDC FENV_ACCESS ON
 
 void PrintHelp()
 {

@@ -83,29 +83,17 @@ ParsedCommand ParseCommand(const std::string& input)
 
 void HandleEngineOn(Car& car)
 {
-    if (!car.TurnOnEngine())
-    {
-        std::cout << "Failed to turn on engine" << std::endl;
-    }
+    !car.TurnOnEngine();
 }
 
 void HandleEngineOff(Car& car)
 {
-    if (!car.TurnOffEngine())
-    {
-        std::cout << "Car must be stopped and in neutral gear" << std::endl;
-    }
+    car.TurnOffEngine();
 }
 
 void HandleSetGear(Car& car, const std::string& arg)
 {
-    if (arg.empty())
-    {
-        std::cout << "Invalid command argument" << std::endl;
-        return;
-    }
-
-    if (!IsInteger(arg))
+    if (arg.empty() || !IsInteger(arg))
     {
         std::cout << "Invalid command argument" << std::endl;
         return;
@@ -113,40 +101,12 @@ void HandleSetGear(Car& car, const std::string& arg)
 
     int gear = std::stoi(arg);
 
-    if (gear < -1 || gear > 5)
-    {
-        std::cout << "Invalid gear" << std::endl;
-        return;
-    }
-
-    if (!car.GetEngine() && gear != 0)
-    {
-        std::cout << "Cannot set gear while engine is off" << std::endl;
-        return;
-    }
-
-    if (!car.SetGear(gear))
-    {
-        if (gear == -1 && car.GetSpeed() != 0)
-        {
-            std::cout << "Cannot reverse while moving" << std::endl;
-        }
-        else
-        {
-            std::cout << "Unsuitable current speed" << std::endl;
-        }
-    }
+    car.SetGear(gear);
 }
 
 void HandleSetSpeed(Car& car, const std::string& arg)
 {
-    if (arg.empty())
-    {
-        std::cout << "Invalid command argument" << std::endl;
-        return;
-    }
-
-    if (!IsInteger(arg))
+    if (arg.empty() || !IsInteger(arg))
     {
         std::cout << "Invalid command argument" << std::endl;
         return;
@@ -154,28 +114,7 @@ void HandleSetSpeed(Car& car, const std::string& arg)
 
     int speed = std::stoi(arg);
 
-    if (speed < 0)
-    {
-        std::cout << "Speed cannot be negative" << std::endl;
-        return;
-    }
-
-    if (!car.GetEngine())
-    {
-        std::cout << "Cannot set speed while engine is off" << std::endl;
-        return;
-    }
-
-    if (car.GetGear() == 0 && speed > car.GetSpeed())
-    {
-        std::cout << "Cannot accelerate on neutral" << std::endl;
-        return;
-    }
-
-    if (!car.SetSpeed(speed))
-    {
-        std::cout << "Speed is out of gear range" << std::endl;
-    }
+    car.SetSpeed(speed);
 }
 
 void ProcessCommand(Car& car, const std::string& commandLine)

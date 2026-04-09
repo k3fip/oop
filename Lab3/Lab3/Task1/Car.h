@@ -1,6 +1,20 @@
 #pragma once
 
 #include <string>
+#include <unordered_map>
+#include <utility>
+#include <iostream>
+
+static std::unordered_map<int, std::pair<int, int>> speedLimits
+{
+	{ -1, { 0, 20 } },
+	{ 0, { 0, 150 } },
+	{ 1, { 0, 30 } },
+	{ 2, { 20, 50 } },
+	{ 3, { 30, 60 } },
+	{ 4, { 40, 90 } },
+	{ 5, { 50, 150 } }
+};
 
 class Car
 {
@@ -19,6 +33,7 @@ public:
 		}
 		else
 		{
+			std::cout << "Car must be stopped and in neutral gear" << std::endl;
 			return false;
 		}
 	}
@@ -32,53 +47,35 @@ public:
 		}
 		else
 		{
+			std::cout << "Car must be stopped and in neutral gear" << std::endl;
 			return false;
 		}
 	}
 
 	bool SetGear(int gear)
 	{
-		if (gear == 0)
+		if (gear != 0 && m_isTurnedOn == false)
 		{
-			m_gear = 0;
-			return true;
-		}
-
-		if (m_isTurnedOn == false)
-		{
+			std::cout << "Cannot set gear while engine is off" << std::endl;
 			return false;
 		}
 
-		switch (gear)
+		if (gear < -1 || gear > 5)
 		{
-		case -1:
-			if (m_speed != 0) { return false; };
-			break;
-
-		case 1:
-			if (m_speed > 30 || m_direction == "backward") { return false; };
-			break;
-
-		case 2:
-			if (m_speed > 50 || m_speed < 20 || m_direction == "backward") { return false; };
-			break;
-
-		case 3:
-			if (m_speed > 60 || m_speed < 30 || m_direction == "backward") { return false; };
-			break;
-
-		case 4:
-			if (m_speed > 90 || m_speed < 40 || m_direction == "backward") { return false; };
-			break;
-
-		case 5:
-			if (m_speed > 150 || m_speed < 50 || m_direction == "backward") { return false; };
-			break;
-
-		default:
+			std::cout << "Invalid gear" << std::endl;
 			return false;
-			break;
+		}
 
+		if (gear == -1 && m_speed != 0)
+		{
+			std::cout << "Cannot reverse while moving" << std::endl;
+			return false;
+		}
+
+		if (speedLimits[gear].first > m_speed || speedLimits[gear].second < m_speed || m_direction == "backward")
+		{
+			std::cout << "Unsuitable current speed" << std::endl;
+			return false;
 		}
 
 		m_gear = gear;
@@ -87,36 +84,30 @@ public:
 
 	bool SetSpeed(int speed)
 	{
-		switch (m_gear)
+		if (m_isTurnedOn == false)
 		{
-		case -1:
-			if (speed < 0 || speed > 20) { return false; }
-			break;
-
-		case 0:
-			if (speed < 0 || speed > m_speed) { return false; }
-			break;
-
-		case 1:
-			if (speed < 0 || speed > 30) { return false; }
-			break;
-
-		case 2:
-			if (speed < 20 || speed > 50) { return false; }
-			break;
-
-		case 3:
-			if (speed < 30 || speed > 60) { return false; }
-			break;
-
-		case 4:
-			if (speed < 40 || speed > 90) { return false; }
-			break;
-
-		case 5:
-			if (speed < 50 || speed > 150) { return false; }
-			break;
+			std::cout << "Cannot set speed while engine is off" << std::endl;
+			return false;
 		}
+
+		if (speed < 0 || speed > 150)
+		{
+			std::cout << "Speed must be in [ 0; 150 ]" << std::endl;
+			return false;
+		}
+
+		if (m_gear == 0 && speed > m_speed)
+		{
+			std::cout << "Cannot accelerate on neutral" << std::endl;
+			return false;
+		}
+
+		if (speedLimits[m_gear].first > speed || speedLimits[m_gear].second < speed)
+		{
+			std::cout << "Speed is out of gear range" << std::endl;
+			return false;
+		}
+
 		m_speed = speed;
 		setDirection();
 		return true;

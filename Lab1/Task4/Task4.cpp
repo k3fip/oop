@@ -13,7 +13,7 @@ struct Field
     int rows = 0;
     int cols = 0;
 };
-
+//передавать поток
 void PrintField(Field& field, std::string fileName = "")
 {
     if (fileName != "")
@@ -43,6 +43,7 @@ void PrintField(Field& field, std::string fileName = "")
     
 }
 
+//переделать проверки на ошибки
 bool GetField(std::string fileName, Field& field)
 {
     std::string line;
@@ -76,7 +77,8 @@ bool GetField(std::string fileName, Field& field)
         {
             return true;
         }
-
+        //обработать невалидную ситуацию
+        //вынести в константы символы
         if (line[0] != '*' && line[line.size() - 1] != '*')
         {
             return true;
@@ -117,6 +119,7 @@ bool GetField(std::string fileName, Field& field)
         return true;
     }
 
+    //явно переделать названия
     field.rows = currRow;
     field.cols = expectedCols;
 

@@ -9,6 +9,7 @@
 #include <map>
 #include <functional>
 
+//сделать диаграмму классов draw.io
 bool IsInteger(const std::string& str)
 {
     if (str.empty()) return false;
@@ -49,7 +50,8 @@ ParsedCommand ParseCommand(const std::string& input)
     std::string actionLower = action;
     std::transform(actionLower.begin(), actionLower.end(), actionLower.begin(), ::tolower);
 
-    static const std::map<std::string, CommandType> commandMap = {
+    //вынести константы глобально
+    const std::map<std::string, CommandType> commandMap = {
         {"info", CommandType::INFO},
         {"engineon", CommandType::ENGINE_ON},
         {"engineoff", CommandType::ENGINE_OFF},
@@ -81,6 +83,7 @@ ParsedCommand ParseCommand(const std::string& input)
     return { CommandType::UNKNOWN, "", false };
 }
 
+// исключения должна выкидывать сама машина
 void HandleEngineOn(Car& car)
 {
     if (!car.TurnOnEngine())

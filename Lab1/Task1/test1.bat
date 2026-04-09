@@ -1,4 +1,4 @@
-@echo off
+ @echo off
 
 set PROGRAM="%~1"
 set OUT="%TEMP%\out.txt" 

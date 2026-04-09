@@ -45,6 +45,8 @@ bool CheckOverflow(float value)
 		std::isinf(value) || std::isnan(value);
 }
 
+
+//передавать поток а не имя файла
 Matrix3x3 GetMatrix(bool& wasError, std::string fileName = "")
 {
 	wasError = false;
@@ -204,6 +206,8 @@ Matrix3x3 GetInvertedMatrix(Matrix3x3 matrix, bool& wasError)
 	}
 
 	float det = Determinant3x3(matrix, wasError);
+	//разобраться со сравнением
+
 	if (wasError || det == 0)
 	{
 		wasError = true;

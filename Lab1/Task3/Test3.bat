@@ -67,6 +67,8 @@ fc %OUT% Boundary-out.txt || goto error
 %PROGRAM% 12345.txt > %OUT%  || goto error
 fc %OUT% Bad-input-out.txt || goto error
 
+
+:: тест на ввод в строку
 echo All tests done
 exit /B 0
 

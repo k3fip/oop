@@ -3,8 +3,8 @@
 #include <iostream>
 #include <sstream>
 #include <string>
-#include "Car.h"
-#include "SimulateCar.h"
+#include "../Task1/Car.h"
+#include "../Task1/SimulateCar.h"
 
 class CaptureOutput
 {

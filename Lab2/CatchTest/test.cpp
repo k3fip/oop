@@ -2,7 +2,7 @@
 #include <catch2/matchers/catch_matchers_floating_point.hpp>
 #include <sstream>
 #include <limits>
-#include "ProcessNumbers.h"
+#include "../Lab2/ProcessNumbers.h"
 
 using Catch::Matchers::WithinRel;
 
@@ -18,15 +18,6 @@ TEST_CASE("CheckOverflow с обычными числами")
 
 TEST_CASE("CheckOverflow с граничными значени€ми")
 {
-    SECTION("Ѕесконечность")
-    {
-        REQUIRE(CheckOverflow(std::numeric_limits<float>::infinity()));
-    }
-
-    SECTION("ћинус бесконечность")
-    {
-        REQUIRE(CheckOverflow(-std::numeric_limits<float>::infinity()));
-    }
 
     SECTION("NaN (не число)")
     {

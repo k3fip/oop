@@ -9,22 +9,24 @@ std::set<int> GeneratePrimeNumbersSet(int upperBound)
 
     std::vector<bool> primes(upperBound + 1, true);
 
-    for (int curr = 2; curr * curr <= upperBound; curr++)
+    for (int curr = 3; curr * curr <= upperBound; curr += 2)
     {
         if (primes[curr])
         {
-            for (int div = curr * curr; div <= upperBound; div += curr) { primes[div] = false; }
+            for (int div = curr * curr; div <= upperBound; div += curr) primes[div] = false;
         }
     }
 
-    std::set<int> result{};
+    std::vector<int> result{};
 
-    for (int i = 2; i <= upperBound; i++)
+    if (upperBound >= 2) result.push_back(2);
+
+    for (int i = 3; i <= upperBound; i += 2)
     {
-        if (primes[i]) result.insert(i);
+        if (primes[i]) result.push_back(i);
     }
 
-    return result;
+    return std::set<int>(result.begin(), result.end());
 }
 
 void PrintSet(std::set<int>& primes, std::ostream& output)

@@ -1,5 +1,6 @@
 #include <iostream>
 #include <string>
+#include <chrono>
 #include "PrimeNumbers.h"
 
 int main(int argc, char* argv[])
@@ -25,8 +26,19 @@ int main(int argc, char* argv[])
     {
         std::cout << "Invalid number.\n";
     }
+    
+    // Таймер для проверки
 
-    std::set<int> primes = GeneratePrimeNumbersSet(upperBound);
+    /*auto start = std::chrono::high_resolution_clock::now();
+
+    auto primes = GeneratePrimeNumbersSet(100000000);
+
+    auto end = std::chrono::high_resolution_clock::now();
+    auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
+
+    std::cout << "Время выполнения: " << duration.count() << " мс\n";*/
+
+    auto primes = GeneratePrimeNumbersSet(upperBound);
+
     PrintSet(primes, std::cout);
-
 }

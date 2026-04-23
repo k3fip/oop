@@ -60,6 +60,7 @@ public:
 			return false;
 		}
 
+		//вынести крайние значения как константы
 		if (gear < -1 || gear > 5)
 		{
 			std::cout << "Invalid gear" << std::endl;
@@ -118,7 +119,7 @@ private:
 	bool m_isTurnedOn = false;
 	int m_gear = 0;
 	int m_speed = 0;
-	std::string m_direction = "standing still";
+	std::string m_direction = "standing still"; //вынести в enum
 
 	void setDirection()
 	{

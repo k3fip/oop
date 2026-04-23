@@ -9,7 +9,15 @@
 #include <map>
 #include <functional>
 
-//сделать диаграмму классов draw.io
+//не надо указывать мапы, только классы
+const std::map<std::string, CommandType> COMMAND_MAP = {
+        {"info", CommandType::INFO},
+        {"engineon", CommandType::ENGINE_ON},
+        {"engineoff", CommandType::ENGINE_OFF},
+        {"setgear", CommandType::SET_GEAR},
+        {"setspeed", CommandType::SET_SPEED}
+};
+
 bool IsInteger(const std::string& str)
 {
     if (str.empty()) return false;
@@ -50,17 +58,8 @@ ParsedCommand ParseCommand(const std::string& input)
     std::string actionLower = action;
     std::transform(actionLower.begin(), actionLower.end(), actionLower.begin(), ::tolower);
 
-    //вынести константы глобально
-    const std::map<std::string, CommandType> commandMap = {
-        {"info", CommandType::INFO},
-        {"engineon", CommandType::ENGINE_ON},
-        {"engineoff", CommandType::ENGINE_OFF},
-        {"setgear", CommandType::SET_GEAR},
-        {"setspeed", CommandType::SET_SPEED}
-    };
-
-    auto it = commandMap.find(actionLower);
-    if (it != commandMap.end())
+    auto it = COMMAND_MAP.find(actionLower);
+    if (it != COMMAND_MAP.end())
     {
         ParsedCommand result;
         result.type = it->second;
@@ -83,7 +82,6 @@ ParsedCommand ParseCommand(const std::string& input)
     return { CommandType::UNKNOWN, "", false };
 }
 
-// исключения должна выкидывать сама машина
 void HandleEngineOn(Car& car)
 {
     !car.TurnOnEngine();

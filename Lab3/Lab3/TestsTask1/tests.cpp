@@ -235,7 +235,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         Car car;
         CaptureOutput capture;
 
-        // Включение двигателя при включенной передаче
         car.TurnOnEngine();
         car.SetGear(1);
         car.TurnOffEngine();
@@ -243,7 +242,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         car.TurnOnEngine();
         REQUIRE(capture.getOutput().find("Car must be stopped and in neutral gear") != std::string::npos);
 
-        // Выключение двигателя при движении
         Car car2;
         car2.TurnOnEngine();
         car2.SetGear(1);
@@ -258,7 +256,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         Car car;
         CaptureOutput capture;
 
-        // Двигатель выключен
         capture.clear();
         car.SetGear(1);
         REQUIRE(capture.getOutput().find("Cannot set gear while engine is off") != std::string::npos);
@@ -274,14 +271,12 @@ TEST_CASE("Вывод сообщений об ошибках")
         car.SetGear(-2);
         REQUIRE(capture.getOutput().find("Invalid gear") != std::string::npos);
 
-        // Задний ход в движении
         car.SetGear(1);
         car.SetSpeed(10);
         capture.clear();
         car.SetGear(-1);
         REQUIRE(capture.getOutput().find("Cannot reverse while moving") != std::string::npos);
 
-        // Неподходящая скорость для передачи
         Car car3;
         car3.TurnOnEngine();
         car3.SetGear(1);
@@ -289,7 +284,7 @@ TEST_CASE("Вывод сообщений об ошибках")
         car3.SetGear(2);
         car3.SetSpeed(50);
         capture.clear();
-        car3.SetGear(1); // скорость 50 > 30 (максимум 1 передачи)
+        car3.SetGear(1); 
         REQUIRE(capture.getOutput().find("Unsuitable current speed") != std::string::npos);
     }
 
@@ -298,14 +293,12 @@ TEST_CASE("Вывод сообщений об ошибках")
         Car car;
         CaptureOutput capture;
 
-        // Двигатель выключен
         capture.clear();
         car.SetSpeed(10);
         REQUIRE(capture.getOutput().find("Cannot set speed while engine is off") != std::string::npos);
 
         car.TurnOnEngine();
 
-        // Неверный диапазон
         capture.clear();
         car.SetSpeed(-1);
         REQUIRE(capture.getOutput().find("Speed must be in [ 0; 150 ]") != std::string::npos);
@@ -314,7 +307,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         car.SetSpeed(151);
         REQUIRE(capture.getOutput().find("Speed must be in [ 0; 150 ]") != std::string::npos);
 
-        // Ускорение на нейтральной
         car.SetGear(1);
         car.SetSpeed(20);
         car.SetGear(0);
@@ -322,7 +314,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         car.SetSpeed(25);
         REQUIRE(capture.getOutput().find("Cannot accelerate on neutral") != std::string::npos);
 
-        // Скорость вне диапазона передачи
         Car car4;
         car4.TurnOnEngine();
         car4.SetGear(1);
@@ -336,7 +327,6 @@ TEST_CASE("Вывод сообщений об ошибках")
         Car car;
         CaptureOutput capture;
 
-        // Пустые аргументы
         capture.clear();
         ProcessCommand(car, "SetGear");
         REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
@@ -345,12 +335,10 @@ TEST_CASE("Вывод сообщений об ошибках")
         ProcessCommand(car, "SetSpeed");
         REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
 
-        // Нечисловые аргументы
         capture.clear();
         ProcessCommand(car, "SetGear abc");
         REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
 
-        // Неизвестная команда
         capture.clear();
         ProcessCommand(car, "unknown");
         REQUIRE(capture.getOutput().find("Unknown command") != std::string::npos);

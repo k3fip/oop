@@ -18,8 +18,7 @@ void PrintRules()
 std::string Trim(const std::string& str)
 {
     size_t first = str.find_first_not_of(" \t\n\r");
-    if (first == std::string::npos)
-        return "";
+    if (first == std::string::npos) return "";
     size_t last = str.find_last_not_of(" \t\n\r");
     return str.substr(first, last - first + 1);
 }
@@ -46,7 +45,7 @@ Dictionary FetchDictionary(const std::string& filename)
         if (delimiterPos != std::string::npos)
         {
             std::string key = Trim(line.substr(0, delimiterPos));
-            std::string valuesStr = line.substr(delimiterPos + 1);
+            std::string valuesStr = Trim(line.substr(delimiterPos + 1));
 
             std::vector<std::string> values;
             size_t start = 0;

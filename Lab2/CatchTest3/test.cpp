@@ -79,7 +79,7 @@ TEST_CASE("FetchDictionary чтение словаря из файла")
         REQUIRE(dict.find("cat") != dict.end());
         REQUIRE(dict["cat"].size() == 1);
         REQUIRE(dict["cat"][0] == "кошка");
-
+ 
         std::remove(testFile.c_str());
     }
 
@@ -241,7 +241,7 @@ TEST_CASE("PrintTranslation форматирование вывода переводов")
     }
 }
 
-TEST_CASE("ProcessDictionary интеграционное тестирование")
+TEST_CASE("ProcessDictionary тестирование")
 {
     SECTION("Поиск существующего слова")
     {
@@ -286,7 +286,6 @@ TEST_CASE("ProcessDictionary интеграционное тестирование")
         Dictionary dict = FetchDictionary(testFile);
         REQUIRE(dict.empty());
 
-        std::remove(testFile.c_str());
     }
 
     SECTION("Добавление нового слова с сохранением")
@@ -308,7 +307,6 @@ TEST_CASE("ProcessDictionary интеграционное тестирование")
         REQUIRE(dict.size() == 1);
         REQUIRE(dict["dog"][0] == "собака");
 
-        std::remove(testFile.c_str());
     }
 
     SECTION("Пустая строка игнорируется")
@@ -329,7 +327,6 @@ TEST_CASE("ProcessDictionary интеграционное тестирование")
         Dictionary dict = FetchDictionary(testFile);
         REQUIRE(dict.empty());
 
-        std::remove(testFile.c_str());
     }
 
     SECTION("Пропуск добавления нового слова при пустом переводе")
@@ -350,7 +347,6 @@ TEST_CASE("ProcessDictionary интеграционное тестирование")
         Dictionary dict = FetchDictionary(testFile);
         REQUIRE(dict.empty());
 
-        std::remove(testFile.c_str());
     }
 
     SECTION("Команда выхода без изменений")
@@ -374,6 +370,5 @@ TEST_CASE("ProcessDictionary интеграционное тестирование")
         REQUIRE(dict.size() == 1);
         REQUIRE(dict["cat"][0] == "кошка");
 
-        std::remove(testFile.c_str());
     }
 }

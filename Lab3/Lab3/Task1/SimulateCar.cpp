@@ -9,7 +9,6 @@
 #include <map>
 #include <functional>
 
-//не надо указывать мапы, только классы
 const std::map<std::string, CommandType> COMMAND_MAP = {
         {"info", CommandType::INFO},
         {"engineon", CommandType::ENGINE_ON},

@@ -1,10 +1,15 @@
-﻿#include "ProcessNumbers.h"
+﻿//Вариант 2
+
+#include "ProcessNumbers.h"
 #include <cfenv>
 #include <algorithm>
 #include <iomanip>
 #include <cmath>
 #include <iostream>
 
+const int PRECISION = 3;
+
+//использовать copy и transform
 bool CheckOverflow(float value)
 {
     int fp_exception = std::fetestexcept(FE_OVERFLOW | FE_UNDERFLOW | FE_INVALID);
@@ -70,7 +75,7 @@ void PrintSortedNumbers(const Vector& vector, std::ostream& output)
 
     for (const auto elem : sorted)
     {
-        output << std::fixed << std::setprecision(3) << elem << " ";
+        output << std::fixed << std::setprecision(PRECISION) << elem << " ";
     }
     output << "\n";
 }

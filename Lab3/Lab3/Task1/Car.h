@@ -5,6 +5,12 @@
 #include <utility>
 #include <iostream>
 
+const int MIN_GEAR = -1;
+const int MAX_GEAR = 5;
+const int MIN_SPEED = 0;
+const int MAX_SPEED = 150;
+
+
 static std::unordered_map<int, std::pair<int, int>> speedLimits
 {
 	{ -1, { 0, 20 } },
@@ -26,7 +32,7 @@ public:
 
 	bool TurnOnEngine()
 	{
-		if (m_gear == 0 && m_speed == 0)
+		if (m_gear == 0 && m_speed == MIN_SPEED)
 		{
 			m_isTurnedOn = true;
 			return true;
@@ -40,7 +46,7 @@ public:
 
 	bool TurnOffEngine()
 	{
-		if (m_gear == 0 && m_speed == 0)
+		if (m_gear == 0 && m_speed == MIN_SPEED)
 		{
 			m_isTurnedOn = false;
 			return true;
@@ -60,14 +66,13 @@ public:
 			return false;
 		}
 
-		//вынести крайние значения как константы
-		if (gear < -1 || gear > 5)
+		if (gear < MIN_GEAR || gear > MAX_GEAR)
 		{
 			std::cout << "Invalid gear" << std::endl;
 			return false;
 		}
 
-		if (gear == -1 && m_speed != 0)
+		if (gear == MIN_GEAR && m_speed != MIN_SPEED)
 		{
 			std::cout << "Cannot reverse while moving" << std::endl;
 			return false;
@@ -91,7 +96,7 @@ public:
 			return false;
 		}
 
-		if (speed < 0 || speed > 150)
+		if (speed < MIN_SPEED || speed > MAX_SPEED)
 		{
 			std::cout << "Speed must be in [ 0; 150 ]" << std::endl;
 			return false;
@@ -118,14 +123,14 @@ private:
 
 	bool m_isTurnedOn = false;
 	int m_gear = 0;
-	int m_speed = 0;
-	std::string m_direction = "standing still"; //вынести в enum
+	int m_speed = MIN_SPEED;
+	std::string m_direction = "standing still";
 
 	void setDirection()
 	{
-		if (m_speed == 0) { m_direction = "standing still"; }
-		else if (m_gear == -1 && m_speed != 0) { m_direction = "backward"; }
-		else if (m_gear != -1 && m_speed != 0) { m_direction = "forward"; }
+		if (m_speed == MIN_SPEED) { m_direction = "standing still"; }
+		else if (m_gear == MIN_GEAR && m_speed != MIN_SPEED) { m_direction = "backward"; }
+		else if (m_gear != MIN_GEAR && m_speed != MIN_SPEED) { m_direction = "forward"; }
 	}
 
 };

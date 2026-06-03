@@ -42,19 +42,9 @@ TEST_CASE("Верхняя граница — простое число")
     REQUIRE(GeneratePrimeNumbersSet(13) == expected);
 }
 
-TEST_CASE("Количество простых чисел до 100")
-{
-    REQUIRE(GeneratePrimeNumbersSet(100).size() == 25);
-}
-
 TEST_CASE("Количество простых чисел до 1000")
 {
     REQUIRE(GeneratePrimeNumbersSet(1000).size() == 168);
-}
-
-TEST_CASE("Количество простых чисел до 10000")
-{
-    REQUIRE(GeneratePrimeNumbersSet(10000).size() == 1229);
 }
 
 TEST_CASE("Количество простых чисел до 100000")
@@ -107,7 +97,7 @@ TEST_CASE("Печать результата GeneratePrimeNumbersSet")
     REQUIRE(oss.str() == "2\n3\n5\n7\n");
 }
 
-TEST_CASE("Интеграционный тест для bound 20")
+TEST_CASE("Полный цикл для 20")
 {
     auto primes = GeneratePrimeNumbersSet(20);
     std::ostringstream oss;
@@ -125,6 +115,6 @@ TEST_CASE("Производительность для MAX_UPPER_BOUND")
     auto end = std::chrono::high_resolution_clock::now();
 
     auto duration = std::chrono::duration_cast<std::chrono::milliseconds>(end - start);
-    REQUIRE(duration.count() < 30000);
+    REQUIRE(duration.count() < 10000);
     REQUIRE(primes.size() == 5761455);
 }

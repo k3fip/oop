@@ -262,7 +262,6 @@ TEST_CASE("Вывод сообщений об ошибках")
 
         car.TurnOnEngine();
 
-        // Неверная передача
         capture.clear();
         car.SetGear(6);
         REQUIRE(capture.getOutput().find("Invalid gear") != std::string::npos);

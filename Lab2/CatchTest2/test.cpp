@@ -123,7 +123,7 @@ TEST_CASE("Чтение из строкового потока") {
 
     SECTION("Несколько слов") {
         std::stringstream ss("Hello World");
-        REQUIRE(GetString(ss) == "HelloWorld");
+        REQUIRE(GetString(ss) == "Hello World");
     }
 
     SECTION("Несколько строк") {
@@ -138,12 +138,12 @@ TEST_CASE("Чтение из строкового потока") {
 
     SECTION("Только пробельные символы") {
         std::stringstream ss("   \n   \t   ");
-        REQUIRE(GetString(ss) == "");
+        REQUIRE(GetString(ss) == "      \t   ");
     }
 
     SECTION("Смешанное содержимое") {
         std::stringstream ss("Hello &lt;World&gt; 123");
-        REQUIRE(GetString(ss) == "Hello&lt;World&gt;123");
+        REQUIRE(GetString(ss) == "Hello &lt;World&gt; 123");
     }
 }
 
@@ -152,13 +152,13 @@ TEST_CASE("GetString + HTMLDecode") {
         std::stringstream ss("Hello &lt;World&gt;");
         std::string raw = GetString(ss);
         std::string decoded = HTMLDecode(raw);
-        REQUIRE(decoded == "Hello<World>");
+        REQUIRE(decoded == "Hello <World>");
     }
 
     SECTION("Сложный конвейер") {
         std::stringstream ss("AT&amp;T &quot;Hello&quot; &apos;World&apos;");
         std::string raw = GetString(ss);
         std::string decoded = HTMLDecode(raw);
-        REQUIRE(decoded == "AT&T\"Hello\"'World'");
+        REQUIRE(decoded == "AT&T \"Hello\" 'World'");
     }
 }

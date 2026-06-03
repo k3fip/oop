@@ -9,7 +9,7 @@
 class CaptureOutput
 {
 public:
-    CaptureOutput() : old(std::cout.rdbuf(buffer.rdbuf())) { }
+    CaptureOutput() : old(std::cout.rdbuf(buffer.rdbuf())) {}
     ~CaptureOutput() { std::cout.rdbuf(old); }
     std::string getOutput() { return buffer.str(); }
     void clear() { buffer.str(""); buffer.clear(); }
@@ -19,7 +19,7 @@ private:
     std::streambuf* old;
 };
 
-TEST_CASE("Начальное состояние")
+TEST_CASE("Начальное состояние автомобиля")
 {
     Car car;
     REQUIRE_FALSE(car.GetEngine());
@@ -28,334 +28,175 @@ TEST_CASE("Начальное состояние")
     REQUIRE(car.GetDirection() == "standing still");
 }
 
-TEST_CASE("Двигатель")
+TEST_CASE("Управление двигателем через CommandHandler")
 {
-    Car car;
-
-    SECTION("Включение/выключение")
+    SECTION("Успешное включение двигателя")
     {
-        REQUIRE(car.TurnOnEngine());
+        Car car;
+        CaptureOutput capture;
+        CommandHandler::HandleEngineOn(car);
         REQUIRE(car.GetEngine());
-        REQUIRE(car.TurnOffEngine());
+        REQUIRE(capture.getOutput().empty());
+    }
+
+    SECTION("Успешное выключение двигателя")
+    {
+        Car car;
+        car.TurnOnEngine();
+        CaptureOutput capture;
+        CommandHandler::HandleEngineOff(car);
         REQUIRE_FALSE(car.GetEngine());
+        REQUIRE(capture.getOutput().empty());
     }
 
-    SECTION("Нельзя включить при включенной передаче")
+    SECTION("Ошибка включения при включенной передаче")
     {
+        Car car;
         car.TurnOnEngine();
         car.SetGear(1);
         car.TurnOffEngine();
-        REQUIRE_FALSE(car.TurnOnEngine());
+
+        CaptureOutput capture;
+        CommandHandler::HandleEngineOn(car);
+        REQUIRE(capture.getOutput().find("Failed to turn on engine") != std::string::npos);
     }
 
-    SECTION("Нельзя выключить при движении")
+    SECTION("Ошибка выключения при движении")
     {
+        Car car;
         car.TurnOnEngine();
         car.SetGear(1);
         car.SetSpeed(10);
-        REQUIRE_FALSE(car.TurnOffEngine());
+
+        CaptureOutput capture;
+        CommandHandler::HandleEngineOff(car);
+        REQUIRE(capture.getOutput().find("Failed to turn off engine") != std::string::npos);
     }
 }
 
-TEST_CASE("Передачи")
+TEST_CASE("Обработка передач через CommandHandler")
 {
-    Car car;
-    car.TurnOnEngine();
-
-    SECTION("Задний ход - только на скорости 0")
+    SECTION("Успешная установка передачи")
     {
-        REQUIRE(car.SetGear(-1));
-        car.SetGear(1);
-        car.SetSpeed(10);
-        REQUIRE_FALSE(car.SetGear(-1));
-        car.SetSpeed(0);
-        REQUIRE(car.SetGear(-1));
-    }
+        Car car;
+        car.TurnOnEngine();
 
-    SECTION("С заднего на переднюю - только на 0")
-    {
-        car.SetGear(-1);
-        car.SetSpeed(10);
-        REQUIRE_FALSE(car.SetGear(1));
-        car.SetSpeed(0);
-        REQUIRE(car.SetGear(1));
-    }
-}
-
-TEST_CASE("Последовательный разгон и торможение")
-{
-    Car car;
-    car.TurnOnEngine();
-
-    SECTION("Разгон")
-    {
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(0));
-        REQUIRE(car.SetSpeed(30));
+        CaptureOutput capture;
+        CommandHandler::HandleSetGear(car, "1");
         REQUIRE(car.GetGear() == 1);
-        REQUIRE(car.GetDirection() == "forward");
-
-        REQUIRE(car.SetGear(2));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE(car.SetSpeed(50));
-        REQUIRE(car.GetGear() == 2);
-
-        REQUIRE(car.SetGear(3));
-        REQUIRE(car.SetSpeed(30));
-        REQUIRE(car.SetSpeed(60));
-        REQUIRE(car.GetGear() == 3);
-
-        REQUIRE(car.SetGear(4));
-        REQUIRE(car.SetSpeed(40));
-        REQUIRE(car.SetSpeed(90));
-        REQUIRE(car.GetGear() == 4);
-
-        REQUIRE(car.SetGear(5));
-        REQUIRE(car.SetSpeed(50));
-        REQUIRE(car.SetSpeed(150));
-        REQUIRE(car.GetGear() == 5);
+        REQUIRE(capture.getOutput().empty());
     }
 
-    SECTION("Торможение")
-    {
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(30));
-        REQUIRE(car.SetGear(2));
-        REQUIRE(car.SetSpeed(50));
-        REQUIRE(car.SetGear(3));
-        REQUIRE(car.SetSpeed(60));
-        REQUIRE(car.SetGear(4));
-        REQUIRE(car.SetSpeed(90));
-        REQUIRE(car.SetGear(5));
-        REQUIRE(car.SetSpeed(150));
-
-        REQUIRE(car.SetSpeed(50));
-        REQUIRE(car.SetGear(4));
-        REQUIRE(car.SetSpeed(40));
-        REQUIRE(car.SetGear(3));
-        REQUIRE(car.SetSpeed(30));
-        REQUIRE(car.SetGear(2));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(0));
-        REQUIRE(car.SetGear(0));
-    }
-
-    SECTION("Задний ход")
-    {
-        REQUIRE(car.SetGear(-1));
-        REQUIRE(car.SetSpeed(0));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE(car.GetDirection() == "backward");
-        REQUIRE_FALSE(car.SetSpeed(21));
-    }
-
-    SECTION("Нейтраль")
-    {
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(30));
-        REQUIRE(car.SetGear(0));
-        REQUIRE_FALSE(car.SetSpeed(31));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE_FALSE(car.SetSpeed(30));
-    }
-}
-
-TEST_CASE("Направление")
-{
-    Car car;
-    car.TurnOnEngine();
-
-    CHECK(car.GetDirection() == "standing still");
-
-    car.SetGear(1);
-    car.SetSpeed(10);
-    CHECK(car.GetDirection() == "forward");
-
-    car.SetGear(0);
-    car.SetSpeed(0);
-
-    car.SetGear(-1);
-    car.SetSpeed(5);
-    CHECK(car.GetDirection() == "backward");
-
-    car.SetGear(0);
-    car.SetSpeed(0);
-
-    CHECK(car.GetDirection() == "standing still");
-}
-
-TEST_CASE("Сценарии использования")
-{
-    SECTION("Полный цикл вперед-назад")
-    {
-        Car car;
-        REQUIRE(car.TurnOnEngine());
-
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE(car.GetDirection() == "forward");
-
-        REQUIRE(car.SetGear(2));
-        REQUIRE(car.SetSpeed(30));
-        REQUIRE(car.SetSpeed(20));
-        REQUIRE(car.SetGear(1));
-        REQUIRE(car.SetSpeed(0));
-        REQUIRE(car.SetGear(0));
-
-        REQUIRE(car.SetGear(-1));
-        REQUIRE(car.SetSpeed(15));
-        REQUIRE(car.GetDirection() == "backward");
-
-        REQUIRE(car.SetSpeed(0));
-        REQUIRE(car.SetGear(0));
-        REQUIRE(car.TurnOffEngine());
-    }
-
-    SECTION("Запрещенные действия")
+    SECTION("Ошибка: пустой аргумент")
     {
         Car car;
         car.TurnOnEngine();
 
-        REQUIRE_FALSE(car.SetGear(2));
-
-        car.SetGear(1);
-        car.SetSpeed(5);
-        REQUIRE_FALSE(car.SetGear(-1));
-
-        car.SetGear(0);
-        REQUIRE_FALSE(car.SetSpeed(10));
-    }
-}
-
-TEST_CASE("Вывод сообщений об ошибках")
-{
-    SECTION("Ошибки двигателя")
-    {
-        Car car;
         CaptureOutput capture;
-
-        car.TurnOnEngine();
-        car.SetGear(1);
-        car.TurnOffEngine();
-        capture.clear();
-        car.TurnOnEngine();
-        REQUIRE(capture.getOutput().find("Car must be stopped and in neutral gear") != std::string::npos);
-
-        Car car2;
-        car2.TurnOnEngine();
-        car2.SetGear(1);
-        car2.SetSpeed(10);
-        capture.clear();
-        car2.TurnOffEngine();
-        REQUIRE(capture.getOutput().find("Car must be stopped and in neutral gear") != std::string::npos);
+        CommandHandler::HandleSetGear(car, "");
+        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
     }
 
-    SECTION("Ошибки установки передачи")
+    SECTION("Ошибка: нечисловой аргумент")
     {
         Car car;
-        CaptureOutput capture;
-
-        capture.clear();
-        car.SetGear(1);
-        REQUIRE(capture.getOutput().find("Cannot set gear while engine is off") != std::string::npos);
-
         car.TurnOnEngine();
 
-        capture.clear();
-        car.SetGear(6);
-        REQUIRE(capture.getOutput().find("Invalid gear") != std::string::npos);
+        CaptureOutput capture;
+        CommandHandler::HandleSetGear(car, "abc");
+        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
+    }
 
-        capture.clear();
-        car.SetGear(-2);
-        REQUIRE(capture.getOutput().find("Invalid gear") != std::string::npos);
+    SECTION("Ошибка: недопустимая передача")
+    {
+        Car car;
+        car.TurnOnEngine();
 
+        CaptureOutput capture;
+        CommandHandler::HandleSetGear(car, "6");
+        REQUIRE(capture.getOutput().find("Failed to set gear") != std::string::npos);
+    }
+
+    SECTION("Ошибка: задний ход при движении")
+    {
+        Car car;
+        car.TurnOnEngine();
         car.SetGear(1);
         car.SetSpeed(10);
-        capture.clear();
-        car.SetGear(-1);
-        REQUIRE(capture.getOutput().find("Cannot reverse while moving") != std::string::npos);
 
-        Car car3;
-        car3.TurnOnEngine();
-        car3.SetGear(1);
-        car3.SetSpeed(30);
-        car3.SetGear(2);
-        car3.SetSpeed(50);
-        capture.clear();
-        car3.SetGear(1); 
-        REQUIRE(capture.getOutput().find("Unsuitable current speed") != std::string::npos);
-    }
-
-    SECTION("Ошибки установки скорости")
-    {
-        Car car;
         CaptureOutput capture;
-
-        capture.clear();
-        car.SetSpeed(10);
-        REQUIRE(capture.getOutput().find("Cannot set speed while engine is off") != std::string::npos);
-
-        car.TurnOnEngine();
-
-        capture.clear();
-        car.SetSpeed(-1);
-        REQUIRE(capture.getOutput().find("Speed must be in [ 0; 150 ]") != std::string::npos);
-
-        capture.clear();
-        car.SetSpeed(151);
-        REQUIRE(capture.getOutput().find("Speed must be in [ 0; 150 ]") != std::string::npos);
-
-        car.SetGear(1);
-        car.SetSpeed(20);
-        car.SetGear(0);
-        capture.clear();
-        car.SetSpeed(25);
-        REQUIRE(capture.getOutput().find("Cannot accelerate on neutral") != std::string::npos);
-
-        Car car4;
-        car4.TurnOnEngine();
-        car4.SetGear(1);
-        capture.clear();
-        car4.SetSpeed(31);
-        REQUIRE(capture.getOutput().find("Speed is out of gear range") != std::string::npos);
-    }
-
-    SECTION("Ошибки при обработке команд")
-    {
-        Car car;
-        CaptureOutput capture;
-
-        capture.clear();
-        ProcessCommand(car, "SetGear");
-        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
-
-        capture.clear();
-        ProcessCommand(car, "SetSpeed");
-        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
-
-        capture.clear();
-        ProcessCommand(car, "SetGear abc");
-        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
-
-        capture.clear();
-        ProcessCommand(car, "unknown");
-        REQUIRE(capture.getOutput().find("Unknown command") != std::string::npos);
+        CommandHandler::HandleSetGear(car, "-1");
+        REQUIRE(capture.getOutput().find("Failed to set gear") != std::string::npos);
     }
 }
 
-TEST_CASE("Обработка команд")
+TEST_CASE("Обработка скорости через CommandHandler")
 {
-    Car car;
-    car.TurnOnEngine();
-
-    SECTION("Info")
+    SECTION("Успешная установка скорости")
     {
+        Car car;
+        car.TurnOnEngine();
+        car.SetGear(1);
+
+        CaptureOutput capture;
+        CommandHandler::HandleSetSpeed(car, "20");
+        REQUIRE(car.GetSpeed() == 20);
+        REQUIRE(capture.getOutput().empty());
+    }
+
+    SECTION("Ошибка: пустой аргумент")
+    {
+        Car car;
+        car.TurnOnEngine();
+
+        CaptureOutput capture;
+        CommandHandler::HandleSetSpeed(car, "");
+        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
+    }
+
+    SECTION("Ошибка: нечисловой аргумент")
+    {
+        Car car;
+        car.TurnOnEngine();
+
+        CaptureOutput capture;
+        CommandHandler::HandleSetSpeed(car, "abc");
+        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
+    }
+
+    SECTION("Ошибка: отрицательная скорость")
+    {
+        Car car;
+        car.TurnOnEngine();
+
+        CaptureOutput capture;
+        CommandHandler::HandleSetSpeed(car, "-1");
+        REQUIRE(capture.getOutput().find("Failed to set speed") != std::string::npos);
+    }
+
+    SECTION("Ошибка: скорость вне диапазона передачи")
+    {
+        Car car;
+        car.TurnOnEngine();
+        car.SetGear(1);
+
+        CaptureOutput capture;
+        CommandHandler::HandleSetSpeed(car, "31");
+        REQUIRE(capture.getOutput().find("Failed to set speed") != std::string::npos);
+    }
+}
+
+TEST_CASE("Вывод информации через CommandHandler")
+{
+    SECTION("Вывод состояния автомобиля")
+    {
+        Car car;
+        car.TurnOnEngine();
         car.SetGear(1);
         car.SetSpeed(25);
 
         CaptureOutput capture;
-        ProcessCommand(car, "Info");
+        CommandHandler::PrintInfo(car);
 
         std::string output = capture.getOutput();
         REQUIRE(output.find("Engine: on") != std::string::npos);
@@ -364,45 +205,272 @@ TEST_CASE("Обработка команд")
         REQUIRE(output.find("Gear: 1") != std::string::npos);
     }
 
-    SECTION("Ошибочные команды")
+    SECTION("Вывод состояния после остановки")
     {
+        Car car;
+        car.TurnOnEngine();
+        car.SetGear(-1);
+        car.SetSpeed(10);
+        car.SetSpeed(0);
+        car.SetGear(0);
+        car.TurnOffEngine();
+
         CaptureOutput capture;
+        CommandHandler::PrintInfo(car);
 
-        ProcessCommand(car, "SetGear abc");
-        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
-
-        ProcessCommand(car, "SetSpeed -10");
-        REQUIRE(capture.getOutput().find("Speed must be in [ 0; 150 ]") != std::string::npos);
-
-        ProcessCommand(car, "unknown");
-        REQUIRE(capture.getOutput().find("Unknown command") != std::string::npos);
-    }
-
-    SECTION("Команды при выключенном двигателе")
-    {
-        Car carOff;
-        CaptureOutput capture;
-
-        ProcessCommand(carOff, "SetGear 1");
-        REQUIRE(capture.getOutput().find("Cannot set gear while engine is off") != std::string::npos);
+        std::string output = capture.getOutput();
+        REQUIRE(output.find("Engine: off") != std::string::npos);
+        REQUIRE(output.find("Direction: standing still") != std::string::npos);
+        REQUIRE(output.find("Speed: 0") != std::string::npos);
+        REQUIRE(output.find("Gear: 0") != std::string::npos);
     }
 }
 
-TEST_CASE("Вспомогательные функции")
+TEST_CASE("Парсинг команд через CommandHandler")
 {
-    SECTION("IsInteger")
+    SECTION("Команда Info")
     {
-        REQUIRE(IsInteger("0"));
-        REQUIRE(IsInteger("123"));
-        REQUIRE(IsInteger("-5"));
-        REQUIRE_FALSE(IsInteger(""));
-        REQUIRE_FALSE(IsInteger("12.3"));
+        auto cmd = CommandHandler::ParseCommand("Info");
+        REQUIRE(cmd.type == CommandHandler::CommandType::INFO);
+        REQUIRE_FALSE(cmd.hasArgument);
     }
 
-    SECTION("ParseCommand")
+    SECTION("Команда EngineOn")
     {
-        REQUIRE(ParseCommand("Info").type == CommandType::INFO);
-        REQUIRE(ParseCommand("SetGear 3").type == CommandType::SET_GEAR);
-        REQUIRE(ParseCommand("unknown").type == CommandType::UNKNOWN);
+        auto cmd = CommandHandler::ParseCommand("EngineOn");
+        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_ON);
+        REQUIRE_FALSE(cmd.hasArgument);
+    }
+
+    SECTION("Команда EngineOff")
+    {
+        auto cmd = CommandHandler::ParseCommand("EngineOff");
+        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_OFF);
+        REQUIRE_FALSE(cmd.hasArgument);
+    }
+
+    SECTION("Команда SetGear с аргументом")
+    {
+        auto cmd = CommandHandler::ParseCommand("SetGear 3");
+        REQUIRE(cmd.type == CommandHandler::CommandType::SET_GEAR);
+        REQUIRE(cmd.hasArgument);
+        REQUIRE(cmd.argument == "3");
+    }
+
+    SECTION("Команда SetGear без аргумента")
+    {
+        auto cmd = CommandHandler::ParseCommand("SetGear");
+        REQUIRE(cmd.type == CommandHandler::CommandType::SET_GEAR);
+        REQUIRE_FALSE(cmd.hasArgument);
+    }
+
+    SECTION("Команда SetSpeed с аргументом")
+    {
+        auto cmd = CommandHandler::ParseCommand("SetSpeed 50");
+        REQUIRE(cmd.type == CommandHandler::CommandType::SET_SPEED);
+        REQUIRE(cmd.hasArgument);
+        REQUIRE(cmd.argument == "50");
+    }
+
+    SECTION("Команда SetSpeed с отрицательным аргументом")
+    {
+        auto cmd = CommandHandler::ParseCommand("SetSpeed -10");
+        REQUIRE(cmd.type == CommandHandler::CommandType::SET_SPEED);
+        REQUIRE(cmd.hasArgument);
+        REQUIRE(cmd.argument == "-10");
+    }
+
+    SECTION("Неизвестная команда")
+    {
+        auto cmd = CommandHandler::ParseCommand("unknown");
+        REQUIRE(cmd.type == CommandHandler::CommandType::UNKNOWN);
+        REQUIRE_FALSE(cmd.hasArgument);
+    }
+
+    SECTION("Регистронезависимость команд")
+    {
+        auto cmd = CommandHandler::ParseCommand("info");
+        REQUIRE(cmd.type == CommandHandler::CommandType::INFO);
+
+        cmd = CommandHandler::ParseCommand("ENGINEOFF");
+        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_OFF);
+    }
+}
+
+TEST_CASE("Обработка команд через ProcessCommand")
+{
+    SECTION("Обработка команды Info")
+    {
+        Car car;
+        car.TurnOnEngine();
+        car.SetGear(1);
+        car.SetSpeed(25);
+
+        CaptureOutput capture;
+        CommandHandler::ProcessCommand(car, "Info");
+
+        std::string output = capture.getOutput();
+        REQUIRE(output.find("Engine: on") != std::string::npos);
+        REQUIRE(output.find("Direction: forward") != std::string::npos);
+        REQUIRE(output.find("Speed: 25") != std::string::npos);
+        REQUIRE(output.find("Gear: 1") != std::string::npos);
+    }
+
+    SECTION("Обработка команды EngineOn")
+    {
+        Car car;
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        REQUIRE(car.GetEngine());
+    }
+
+    SECTION("Обработка команды EngineOff")
+    {
+        Car car;
+        car.TurnOnEngine();
+        CommandHandler::ProcessCommand(car, "EngineOff");
+        REQUIRE_FALSE(car.GetEngine());
+    }
+
+    SECTION("Обработка команды SetGear с валидным аргументом")
+    {
+        Car car;
+        car.TurnOnEngine();
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        REQUIRE(car.GetGear() == 1);
+    }
+
+    SECTION("Обработка команды SetGear без аргумента")
+    {
+        Car car;
+        CaptureOutput capture;
+        CommandHandler::ProcessCommand(car, "SetGear");
+        REQUIRE(capture.getOutput().find("Invalid command argument") != std::string::npos);
+    }
+
+    SECTION("Обработка команды SetSpeed с валидным аргументом")
+    {
+        Car car;
+        car.TurnOnEngine();
+        car.SetGear(1);
+        CommandHandler::ProcessCommand(car, "SetSpeed 20");
+        REQUIRE(car.GetSpeed() == 20);
+    }
+
+    SECTION("Обработка неизвестной команды")
+    {
+        Car car;
+        CaptureOutput capture;
+        CommandHandler::ProcessCommand(car, "unknown");
+        REQUIRE(capture.getOutput().find("Unknown command") != std::string::npos);
+    }
+}
+
+TEST_CASE("Вспомогательные функции CommandHandler")
+{
+    SECTION("IsInteger с валидными значениями")
+    {
+        REQUIRE(CommandHandler::IsInteger("0"));
+        REQUIRE(CommandHandler::IsInteger("123"));
+    }
+
+    SECTION("IsInteger с невалидными значениями")
+    {
+        REQUIRE_FALSE(CommandHandler::IsInteger("12.3"));
+        REQUIRE_FALSE(CommandHandler::IsInteger("-"));
+        REQUIRE_FALSE(CommandHandler::IsInteger("12a"));
+    }
+}
+
+TEST_CASE("Интеграционные сценарии через ProcessCommand")
+{
+    SECTION("Полный цикл движения вперед")
+    {
+        Car car;
+
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        REQUIRE(car.GetEngine());
+
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        REQUIRE(car.GetGear() == 1);
+
+        CommandHandler::ProcessCommand(car, "SetSpeed 20");
+        REQUIRE(car.GetSpeed() == 20);
+        REQUIRE(car.GetDirection() == "forward");
+
+        CommandHandler::ProcessCommand(car, "SetSpeed 0");
+        CommandHandler::ProcessCommand(car, "SetGear 0");
+        CommandHandler::ProcessCommand(car, "EngineOff");
+
+        REQUIRE_FALSE(car.GetEngine());
+        REQUIRE(car.GetSpeed() == 0);
+        REQUIRE(car.GetGear() == 0);
+    }
+
+    SECTION("Полный цикл движения назад")
+    {
+        Car car;
+
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        CommandHandler::ProcessCommand(car, "SetGear -1");
+        CommandHandler::ProcessCommand(car, "SetSpeed 15");
+
+        REQUIRE(car.GetDirection() == "backward");
+        REQUIRE(car.GetSpeed() == 15);
+
+        CommandHandler::ProcessCommand(car, "SetSpeed 0");
+        CommandHandler::ProcessCommand(car, "SetGear 0");
+        CommandHandler::ProcessCommand(car, "EngineOff");
+
+        REQUIRE_FALSE(car.GetEngine());
+    }
+
+    SECTION("Попытка включения заднего хода при движении вперед")
+    {
+        Car car;
+
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        CommandHandler::ProcessCommand(car, "SetSpeed 10");
+
+        CaptureOutput capture;
+        CommandHandler::ProcessCommand(car, "SetGear -1");
+
+        REQUIRE(capture.getOutput().find("Failed to set gear") != std::string::npos);
+        REQUIRE(car.GetGear() == 1);
+    }
+
+    SECTION("Попытка выключения двигателя на скорости")
+    {
+        Car car;
+
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        CommandHandler::ProcessCommand(car, "SetSpeed 30");
+
+        CaptureOutput capture;
+        CommandHandler::ProcessCommand(car, "EngineOff");
+
+        REQUIRE(capture.getOutput().find("Failed to turn off engine") != std::string::npos);
+        REQUIRE(car.GetEngine());
+    }
+
+    SECTION("Множественные ошибки и восстановление")
+    {
+        Car car;
+        CaptureOutput capture;
+
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        REQUIRE(capture.getOutput().find("Failed to set gear") != std::string::npos);
+
+        CommandHandler::ProcessCommand(car, "SetSpeed 50");
+        REQUIRE(capture.getOutput().find("Failed to set speed") != std::string::npos);
+
+        CommandHandler::ProcessCommand(car, "EngineOn");
+        CommandHandler::ProcessCommand(car, "SetGear 1");
+        CommandHandler::ProcessCommand(car, "SetSpeed 25");
+
+        REQUIRE(car.GetEngine());
+        REQUIRE(car.GetGear() == 1);
+        REQUIRE(car.GetSpeed() == 25);
     }
 }

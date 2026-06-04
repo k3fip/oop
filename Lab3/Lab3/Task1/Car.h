@@ -5,6 +5,7 @@
 #include <utility>
 #include <iostream>
 
+//разделить имплементацию и реализацию
 const int MIN_GEAR = -1;
 const int MAX_GEAR = 5;
 const int MIN_SPEED = 0;

@@ -147,6 +147,12 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Lab4\CCircle.cpp" />
+    <ClCompile Include="..\Lab4\CLineSegment.cpp" />
+    <ClCompile Include="..\Lab4\CPoint.cpp" />
+    <ClCompile Include="..\Lab4\CRectangle.cpp" />
+    <ClCompile Include="..\Lab4\CTriangle.cpp" />
+    <ClCompile Include="..\Lab4\ShapeCommandHandler.cpp" />
     <ClCompile Include="TestLab4.cpp" />
     <ClCompile Include="tests.cpp" />
   </ItemGroup>

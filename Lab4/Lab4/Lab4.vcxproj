@@ -127,11 +127,23 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="CCircle.cpp" />
+    <ClCompile Include="CLineSegment.cpp" />
+    <ClCompile Include="CPoint.cpp" />
+    <ClCompile Include="CRectangle.cpp" />
+    <ClCompile Include="CTriangle.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="ShapeCommandHandler.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="CCircle.h" />
+    <ClInclude Include="CLineSegment.h" />
+    <ClInclude Include="CPoint.h" />
+    <ClInclude Include="CRectangle.h" />
+    <ClInclude Include="CTriangle.h" />
+    <ClInclude Include="IShape.h" />
+    <ClInclude Include="ISolidShape.h" />
     <ClInclude Include="ShapeCommandHandler.h" />
-    <ClInclude Include="Shapes.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

@@ -5,8 +5,14 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include "../Lab4/Shapes.h"
 #include "../Lab4/ShapeCommandHandler.h"
+#include "../Lab4/IShape.h"
+#include "../Lab4/ISolidShape.h"
+#include "../Lab4/CLineSegment.h"
+#include "../Lab4/CCircle.h"
+#include "../Lab4/CTriangle.h"
+#include "../Lab4/CRectangle.h"
+#include "../Lab4/CPoint.h"
 
 class CaptureOutput
 {
@@ -503,7 +509,7 @@ TEST_CASE("ShapeCommandHandler - FindShapeWithMinPerimeter")
     }
 }
 
-TEST_CASE("Интеграционные сценарии")
+TEST_CASE("Cценарии")
 {
     std::vector<std::unique_ptr<IShape>> shapes;
 

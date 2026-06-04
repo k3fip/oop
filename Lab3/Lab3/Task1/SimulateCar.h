@@ -9,6 +9,7 @@
 #include <algorithm>
 #include <map>
 
+//вынести константы вне класса
 class CommandHandler
 {
 public:

@@ -238,39 +238,14 @@ TEST_CASE("ShapeCommandHandler - ParseColor")
     }
 }
 
-TEST_CASE("ShapeCommandHandler - IsDouble")
-{
-    SECTION("Валидные числа")
-    {
-        REQUIRE(ShapeCommandHandler::IsDouble("0"));
-        REQUIRE(ShapeCommandHandler::IsDouble("123"));
-        REQUIRE(ShapeCommandHandler::IsDouble("-5"));
-        REQUIRE(ShapeCommandHandler::IsDouble("3.14"));
-        REQUIRE(ShapeCommandHandler::IsDouble("-2.5"));
-    }
 
-    SECTION("Граничные значения")
-    {
-        REQUIRE(ShapeCommandHandler::IsDouble("0.0"));
-        REQUIRE(ShapeCommandHandler::IsDouble("-0.0"));
-        REQUIRE(ShapeCommandHandler::IsDouble("999999.999999"));
-    }
-
-    SECTION("Невалидные значения")
-    {
-        REQUIRE_FALSE(ShapeCommandHandler::IsDouble(""));
-        REQUIRE_FALSE(ShapeCommandHandler::IsDouble("abc"));
-        REQUIRE_FALSE(ShapeCommandHandler::IsDouble("12.3.4"));
-        REQUIRE_FALSE(ShapeCommandHandler::IsDouble("-"));
-    }
-}
 
 TEST_CASE("ShapeCommandHandler - ParseCommand")
 {
     SECTION("Валидные команды")
     {
         auto cmd = ShapeCommandHandler::ParseCommand("LineSegment 0 0 5 5 FF0000");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::LINE_SEGMENT);
+        REQUIRE(cmd.type == CommandType::LINE_SEGMENT);
         REQUIRE(cmd.arguments.size() == 5);
         REQUIRE(cmd.arguments[0] == "0");
         REQUIRE(cmd.arguments[4] == "FF0000");
@@ -279,32 +254,32 @@ TEST_CASE("ShapeCommandHandler - ParseCommand")
     SECTION("Регистронезависимость")
     {
         auto cmd = ShapeCommandHandler::ParseCommand("linesegment 0 0 5 5 FF0000");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::LINE_SEGMENT);
+        REQUIRE(cmd.type == CommandType::LINE_SEGMENT);
 
         cmd = ShapeCommandHandler::ParseCommand("CIRCLE 0 0 5 FF0000 00FF00");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::CIRCLE);
+        REQUIRE(cmd.type == CommandType::CIRCLE);
     }
 
     SECTION("Неизвестная команда")
     {
         auto cmd = ShapeCommandHandler::ParseCommand("unknown");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::UNKNOWN);
+        REQUIRE(cmd.type == CommandType::UNKNOWN);
     }
 
     SECTION("Пустая строка")
     {
         auto cmd = ShapeCommandHandler::ParseCommand("");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::UNKNOWN);
+        REQUIRE(cmd.type == CommandType::UNKNOWN);
     }
 
     SECTION("Команда с разным количеством аргументов")
     {
         auto cmd = ShapeCommandHandler::ParseCommand("LineSegment");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::LINE_SEGMENT);
+        REQUIRE(cmd.type == CommandType::LINE_SEGMENT);
         REQUIRE(cmd.arguments.empty());
 
         cmd = ShapeCommandHandler::ParseCommand("Triangle 0 0 3 0 0 4 FF0000 00FF00 extra");
-        REQUIRE(cmd.type == ShapeCommandHandler::CommandType::TRIANGLE);
+        REQUIRE(cmd.type == CommandType::TRIANGLE);
         REQUIRE(cmd.arguments.size() == 9);
     }
 }

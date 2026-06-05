@@ -26,7 +26,5 @@ private:
 	double m_radius;
 	uint32_t m_outlineColor;
 	uint32_t m_fillColor;
-
-	//#define
-	static constexpr double M_PI = 3.141592;
+	
 };

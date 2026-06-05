@@ -231,28 +231,28 @@ TEST_CASE("Парсинг команд через CommandHandler")
     SECTION("Команда Info")
     {
         auto cmd = CommandHandler::ParseCommand("Info");
-        REQUIRE(cmd.type == CommandHandler::CommandType::INFO);
+        REQUIRE(cmd.type == CommandType::INFO);
         REQUIRE_FALSE(cmd.hasArgument);
     }
 
     SECTION("Команда EngineOn")
     {
         auto cmd = CommandHandler::ParseCommand("EngineOn");
-        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_ON);
+        REQUIRE(cmd.type == CommandType::ENGINE_ON);
         REQUIRE_FALSE(cmd.hasArgument);
     }
 
     SECTION("Команда EngineOff")
     {
         auto cmd = CommandHandler::ParseCommand("EngineOff");
-        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_OFF);
+        REQUIRE(cmd.type == CommandType::ENGINE_OFF);
         REQUIRE_FALSE(cmd.hasArgument);
     }
 
     SECTION("Команда SetGear с аргументом")
     {
         auto cmd = CommandHandler::ParseCommand("SetGear 3");
-        REQUIRE(cmd.type == CommandHandler::CommandType::SET_GEAR);
+        REQUIRE(cmd.type == CommandType::SET_GEAR);
         REQUIRE(cmd.hasArgument);
         REQUIRE(cmd.argument == "3");
     }
@@ -260,14 +260,14 @@ TEST_CASE("Парсинг команд через CommandHandler")
     SECTION("Команда SetGear без аргумента")
     {
         auto cmd = CommandHandler::ParseCommand("SetGear");
-        REQUIRE(cmd.type == CommandHandler::CommandType::SET_GEAR);
+        REQUIRE(cmd.type == CommandType::SET_GEAR);
         REQUIRE_FALSE(cmd.hasArgument);
     }
 
     SECTION("Команда SetSpeed с аргументом")
     {
         auto cmd = CommandHandler::ParseCommand("SetSpeed 50");
-        REQUIRE(cmd.type == CommandHandler::CommandType::SET_SPEED);
+        REQUIRE(cmd.type == CommandType::SET_SPEED);
         REQUIRE(cmd.hasArgument);
         REQUIRE(cmd.argument == "50");
     }
@@ -275,7 +275,7 @@ TEST_CASE("Парсинг команд через CommandHandler")
     SECTION("Команда SetSpeed с отрицательным аргументом")
     {
         auto cmd = CommandHandler::ParseCommand("SetSpeed -10");
-        REQUIRE(cmd.type == CommandHandler::CommandType::SET_SPEED);
+        REQUIRE(cmd.type == CommandType::SET_SPEED);
         REQUIRE(cmd.hasArgument);
         REQUIRE(cmd.argument == "-10");
     }
@@ -283,17 +283,17 @@ TEST_CASE("Парсинг команд через CommandHandler")
     SECTION("Неизвестная команда")
     {
         auto cmd = CommandHandler::ParseCommand("unknown");
-        REQUIRE(cmd.type == CommandHandler::CommandType::UNKNOWN);
+        REQUIRE(cmd.type == CommandType::UNKNOWN);
         REQUIRE_FALSE(cmd.hasArgument);
     }
 
     SECTION("Регистронезависимость команд")
     {
         auto cmd = CommandHandler::ParseCommand("info");
-        REQUIRE(cmd.type == CommandHandler::CommandType::INFO);
+        REQUIRE(cmd.type == CommandType::INFO);
 
         cmd = CommandHandler::ParseCommand("ENGINEOFF");
-        REQUIRE(cmd.type == CommandHandler::CommandType::ENGINE_OFF);
+        REQUIRE(cmd.type == CommandType::ENGINE_OFF);
     }
 }
 
@@ -362,22 +362,6 @@ TEST_CASE("Обработка команд через ProcessCommand")
         CaptureOutput capture;
         CommandHandler::ProcessCommand(car, "unknown");
         REQUIRE(capture.getOutput().find("Unknown command") != std::string::npos);
-    }
-}
-
-TEST_CASE("Вспомогательные функции CommandHandler")
-{
-    SECTION("IsInteger с валидными значениями")
-    {
-        REQUIRE(CommandHandler::IsInteger("0"));
-        REQUIRE(CommandHandler::IsInteger("123"));
-    }
-
-    SECTION("IsInteger с невалидными значениями")
-    {
-        REQUIRE_FALSE(CommandHandler::IsInteger("12.3"));
-        REQUIRE_FALSE(CommandHandler::IsInteger("-"));
-        REQUIRE_FALSE(CommandHandler::IsInteger("12a"));
     }
 }
 

@@ -155,6 +155,8 @@
     </Bscmake>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\Task1\Car.cpp" />
+    <ClCompile Include="..\Task1\SimulateCar.cpp" />
     <ClCompile Include="tests.cpp" />
     <ClCompile Include="TestsTask1.cpp" />
   </ItemGroup>

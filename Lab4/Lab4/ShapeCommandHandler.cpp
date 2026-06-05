@@ -45,7 +45,7 @@ void ShapeCommandHandler::ProcessCommand(std::vector<std::unique_ptr<IShape>>& s
     }
 }
 
-ShapeCommandHandler::ParsedCommand ShapeCommandHandler::ParseCommand(const std::string& input)
+ParsedCommand ShapeCommandHandler::ParseCommand(const std::string& input)
 {
     std::istringstream iss(input);
     std::string action;
@@ -104,41 +104,33 @@ uint32_t ShapeCommandHandler::ParseColor(const std::string& colorStr)
     }
 }
 
-//использовать встроенные функкции
-bool ShapeCommandHandler::IsDouble(const std::string& str)
-{
-    if (str.empty()) return false;
-
-    size_t start = 0;
-    if (str[0] == MINUS_CHAR)
-    {
-        if (str.length() == 1) return false;
-        start = 1;
-    }
-
-    bool hasDecimalPoint = false;
-    for (size_t i = start; i < str.length(); ++i)
-    {
-        if (str[i] == DECIMAL_POINT)
-        {
-            if (hasDecimalPoint) return false;
-            hasDecimalPoint = true;
-        }
-        else if (!isdigit(str[i]))
-        {
-            return false;
-        }
-    }
-    return true;
-}
-
-
-// поиск по вектору через lambda
 const IShape* ShapeCommandHandler::FindShapeWithMaxArea(const std::vector<std::unique_ptr<IShape>>& shapes)
 {
     if (shapes.empty()) return nullptr;
 
-    const IShape* maxShape = shapes[0].get();
+    auto maxAreaShape = std::max_element(shapes.begin(), shapes.end(), 
+        [](const std::unique_ptr<IShape>& first, const std::unique_ptr<IShape>& second)
+        {
+            return first->GetArea() < second->GetArea();
+        });
+
+    return maxAreaShape->get();
+}
+
+const IShape* ShapeCommandHandler::FindShapeWithMinPerimeter(const std::vector<std::unique_ptr<IShape>>& shapes)
+{
+    if (shapes.empty()) return nullptr;
+
+    auto minPerimeterShape = std::min_element(shapes.begin(), shapes.end(), 
+        [](const std::unique_ptr<IShape>& first, const std::unique_ptr<IShape>& second)
+        {
+            return first->GetPerimeter() < second->GetPerimeter();
+        });
+
+    return minPerimeterShape->get();
+}
+
+/*const IShape* maxShape = shapes[0].get();
     double maxArea = shapes[0]->GetArea();
 
     for (size_t i = 1; i < shapes.size(); ++i)
@@ -149,16 +141,9 @@ const IShape* ShapeCommandHandler::FindShapeWithMaxArea(const std::vector<std::u
             maxArea = area;
             maxShape = shapes[i].get();
         }
-    }
+    }*/
 
-    return maxShape;
-}
-
-const IShape* ShapeCommandHandler::FindShapeWithMinPerimeter(const std::vector<std::unique_ptr<IShape>>& shapes)
-{
-    if (shapes.empty()) return nullptr;
-
-    const IShape* minShape = shapes[0].get();
+/*const IShape* minShape = shapes[0].get();
     double minPerimeter = shapes[0]->GetPerimeter();
 
     for (size_t i = 1; i < shapes.size(); ++i)
@@ -171,8 +156,7 @@ const IShape* ShapeCommandHandler::FindShapeWithMinPerimeter(const std::vector<s
         }
     }
 
-    return minShape;
-}
+    return minShape;*/
 
 void ShapeCommandHandler::HandleLineSegment(std::vector<std::unique_ptr<IShape>>& shapes, const std::vector<std::string>& args)
 {
@@ -182,25 +166,26 @@ void ShapeCommandHandler::HandleLineSegment(std::vector<std::unique_ptr<IShape>>
         return;
     }
 
-    if (!IsDouble(args[0]) || !IsDouble(args[1]) || !IsDouble(args[2]) || !IsDouble(args[3]))
+    try
+    {
+        double startX = std::stod(args[LINE_SEGMENT_ARGS_COUNT - 5]);
+        double startY = std::stod(args[LINE_SEGMENT_ARGS_COUNT - 4]);
+        double endX = std::stod(args[LINE_SEGMENT_ARGS_COUNT - 3]);
+        double endY = std::stod(args[LINE_SEGMENT_ARGS_COUNT - 2]);
+        uint32_t outlineColor = ParseColor(args[LINE_SEGMENT_ARGS_COUNT - 1]);
+
+        shapes.push_back(std::make_unique<CLineSegment>(
+            startX,
+            startY,
+            endX,
+            endY,
+            outlineColor
+        ));
+    }
+    catch (const std::exception&)
     {
         std::cout << INVALID_COORDINATES << std::endl;
-        return;
     }
-
-    double startX = std::stod(args[0]);
-    double startY = std::stod(args[1]);
-    double endX = std::stod(args[2]);
-    double endY = std::stod(args[3]);
-    uint32_t outlineColor = ParseColor(args[4]);
-
-    shapes.push_back(std::make_unique<CLineSegment>(
-        startX,
-        startY,
-        endX,
-        endY,
-        outlineColor
-    ));
 }
 
 void ShapeCommandHandler::HandleTriangle(std::vector<std::unique_ptr<IShape>>& shapes, const std::vector<std::string>& args)
@@ -211,31 +196,29 @@ void ShapeCommandHandler::HandleTriangle(std::vector<std::unique_ptr<IShape>>& s
         return;
     }
 
-    for (int i = 0; i < 6; ++i)
+    try
     {
-        if (!IsDouble(args[i]))
-        {
-            std::cout << INVALID_COORDINATES << std::endl;
-            return;
-        }
+        double v1x = std::stod(args[TRIANGLE_ARGS_COUNT - 8]);
+        double v1y = std::stod(args[TRIANGLE_ARGS_COUNT - 7]);
+        double v2x = std::stod(args[TRIANGLE_ARGS_COUNT - 6]);
+        double v2y = std::stod(args[TRIANGLE_ARGS_COUNT - 5]);
+        double v3x = std::stod(args[TRIANGLE_ARGS_COUNT - 4]);
+        double v3y = std::stod(args[TRIANGLE_ARGS_COUNT - 3]);
+        uint32_t outlineColor = ParseColor(args[TRIANGLE_ARGS_COUNT - 2]);
+        uint32_t fillColor = ParseColor(args[TRIANGLE_ARGS_COUNT - 1]);
+
+        shapes.push_back(std::make_unique<CTriangle>(
+            CPoint(v1x, v1y),
+            CPoint(v2x, v2y),
+            CPoint(v3x, v3y),
+            outlineColor,
+            fillColor
+        ));
     }
-
-    double v1x = std::stod(args[0]);
-    double v1y = std::stod(args[1]);
-    double v2x = std::stod(args[2]);
-    double v2y = std::stod(args[3]);
-    double v3x = std::stod(args[4]);
-    double v3y = std::stod(args[5]);
-    uint32_t outlineColor = ParseColor(args[6]);
-    uint32_t fillColor = ParseColor(args[7]);
-
-    shapes.push_back(std::make_unique<CTriangle>(
-        CPoint(v1x, v1y),
-        CPoint(v2x, v2y),
-        CPoint(v3x, v3y),
-        outlineColor,
-        fillColor
-    ));
+    catch (const std::exception&)
+    {
+        std::cout << INVALID_COORDINATES << std::endl;
+    }
 }
 
 void ShapeCommandHandler::HandleRectangle(std::vector<std::unique_ptr<IShape>>& shapes, const std::vector<std::string>& args)
@@ -246,28 +229,25 @@ void ShapeCommandHandler::HandleRectangle(std::vector<std::unique_ptr<IShape>>& 
         return;
     }
 
-    //что то придумать с индексами
-    for (int i = 0; i < 4; ++i)
+    try
     {
-        if (!IsDouble(args[i]))
-        {
-            std::cout << INVALID_DIMENSIONS << std::endl;
-            return;
-        }
+        double leftX = std::stod(args[RECTANGLE_ARGS_COUNT - 6]);
+        double topY = std::stod(args[RECTANGLE_ARGS_COUNT - 5]);
+        double width = std::stod(args[RECTANGLE_ARGS_COUNT - 4]);
+        double height = std::stod(args[RECTANGLE_ARGS_COUNT - 3]);
+        uint32_t outlineColor = ParseColor(args[RECTANGLE_ARGS_COUNT - 2]);
+        uint32_t fillColor = ParseColor(args[RECTANGLE_ARGS_COUNT - 1]);
+
+        shapes.push_back(std::make_unique<CRectangle>(
+            leftX, topY, width, height,
+            outlineColor,
+            fillColor
+        ));
     }
-
-    double leftX = std::stod(args[0]);
-    double topY = std::stod(args[1]);
-    double width = std::stod(args[2]);
-    double height = std::stod(args[3]);
-    uint32_t outlineColor = ParseColor(args[4]);
-    uint32_t fillColor = ParseColor(args[5]);
-
-    shapes.push_back(std::make_unique<CRectangle>(
-        leftX, topY, width, height,
-        outlineColor,
-        fillColor
-    ));
+    catch (const std::exception&)
+    {
+        std::cout << INVALID_DIMENSIONS << std::endl;
+    }
 }
 
 void ShapeCommandHandler::HandleCircle(std::vector<std::unique_ptr<IShape>>& shapes, const std::vector<std::string>& args)
@@ -278,26 +258,24 @@ void ShapeCommandHandler::HandleCircle(std::vector<std::unique_ptr<IShape>>& sha
         return;
     }
 
-    for (int i = 0; i < 3; ++i)
+    try
     {
-        if (!IsDouble(args[i]))
-        {
-            std::cout << INVALID_COORDINATES_AND_RADIUS << std::endl;
-            return;
-        }
+        double centerX = std::stod(args[CIRCLE_ARGS_COUNT - 5]);
+        double centerY = std::stod(args[CIRCLE_ARGS_COUNT - 4]);
+        double radius = std::stod(args[CIRCLE_ARGS_COUNT - 3]);
+        uint32_t outlineColor = ParseColor(args[CIRCLE_ARGS_COUNT - 2]);
+        uint32_t fillColor = ParseColor(args[CIRCLE_ARGS_COUNT - 1]);
+
+        shapes.push_back(std::make_unique<CCircle>(
+            centerX, centerY, radius,
+            outlineColor,
+            fillColor
+        ));
     }
-
-    double centerX = std::stod(args[0]);
-    double centerY = std::stod(args[1]);
-    double radius = std::stod(args[2]);
-    uint32_t outlineColor = ParseColor(args[3]);
-    uint32_t fillColor = ParseColor(args[4]);
-
-    shapes.push_back(std::make_unique<CCircle>(
-        centerX, centerY, radius,
-        outlineColor,
-        fillColor
-    ));
+    catch (const std::exception&)
+    {
+        std::cout << INVALID_COORDINATES_AND_RADIUS << std::endl;
+    }
 }
 
 void ShapeCommandHandler::PrintResults(const std::vector<std::unique_ptr<IShape>>& shapes)

@@ -1,15 +1,22 @@
 #pragma once
 #include "IShape.h"
-#include <SFML/Graphics.hpp>
 
-class Rectangle : public IShape {
+
+class Rectangle : public IShape 
+{
+
 private:
-    sf::RectangleShape shape;
+    Point m_p1, m_p2;
+    float m_width, m_height;
 
 public:
-    Rectangle(sf::Vector2f p1, sf::Vector2f p2);
+    Rectangle(Point p1, Point p2);
 
-    void draw(sf::RenderWindow& window) const override;
-    double area() const override;
-    double perimeter() const override;
+    Point GetP1() const;
+    Point GetP2() const;
+    float GetWidth() const;
+    float GetHeight() const;
+
+    double Area() const override;
+    double Perimeter() const override;
 };

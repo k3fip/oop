@@ -2,29 +2,26 @@
 #include "Config.h"
 #include <cmath>
 
-Triangle::Triangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c)
-    : p1(a), p2(b), p3(c)
+Triangle::Triangle(Point p1, Point p2, Point p3)
+    : m_p1(p1), m_p2(p2), m_p3(p3) { };
+
+Point Triangle::GetP1() const
 {
-    shape.setPointCount(3);
-    shape.setPoint(0, p1);
-    shape.setPoint(1, p2);
-    shape.setPoint(2, p3);
-    shape.setFillColor(Config::TRIANGLE_FILL_COLOR);
-    shape.setOutlineThickness(Config::TRIANGLE_OUTLINE_THICKNESS);
-    shape.setOutlineColor(Config::TRIANGLE_OUTLINE_COLOR);
+    return m_p1;
+}
+Point Triangle::GetP2() const
+{
+    return m_p2;
+}
+Point Triangle::GetP3() const
+{
+    return m_p3;
 }
 
-void Triangle::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
+double Triangle::Area() const {
+    return std::abs((m_p1.x * (m_p2.y - m_p3.y) + m_p2.x * (m_p3.y - m_p1.y) + m_p3.x * (m_p1.y - m_p2.y)) / 2.0);
 }
 
-double Triangle::area() const {
-    return std::abs((p1.x * (p2.y - p3.y) + p2.x * (p3.y - p1.y) + p3.x * (p1.y - p2.y)) / 2.0);
-}
-
-double Triangle::perimeter() const {
-    auto dist = [](sf::Vector2f a, sf::Vector2f b) {
-        return std::sqrt(std::pow(b.x - a.x, 2) + std::pow(b.y - a.y, 2));
-        };
-    return dist(p1, p2) + dist(p2, p3) + dist(p3, p1);
+double Triangle::Perimeter() const {
+    return m_p1.DistanceTo(m_p2) + m_p2.DistanceTo(m_p3) + m_p3.DistanceTo(m_p1);
 }

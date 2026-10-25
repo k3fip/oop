@@ -3,27 +3,34 @@
 #include <algorithm>
 #include <cmath>
 
-Rectangle::Rectangle(sf::Vector2f p1, sf::Vector2f p2) {
-    float left = std::min(p1.x, p2.x);
-    float top = std::min(p1.y, p2.y);
-    float width = std::abs(p2.x - p1.x);
-    float height = std::abs(p2.y - p1.y);
+Rectangle::Rectangle(Point p1, Point p2)
+    :m_p1(p1), m_p2(p2),
+     m_width(p1.DistanceTo({ p1.x, p2.y })),
+     m_height(p2.DistanceTo({ p2.x, p1.y })) { };
 
-    shape.setPosition({ left, top });
-    shape.setSize({ width, height });
-    shape.setFillColor(Config::RECTANGLE_FILL_COLOR);
-    shape.setOutlineThickness(Config::RECTANGLE_OUTLINE_THICKNESS);
-    shape.setOutlineColor(Config::RECTANGLE_OUTLINE_COLOR);
+Point Rectangle::GetP1() const
+{
+    return m_p1;
+}
+Point Rectangle::GetP2() const
+{
+    return m_p2;
+}
+float Rectangle::GetWidth() const
+{
+    return m_width;
+}
+float Rectangle::GetHeight() const
+{
+    return m_height;
 }
 
-void Rectangle::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
+double Rectangle::Area() const 
+{
+    return m_width * m_height;
 }
 
-double Rectangle::area() const {
-    return shape.getSize().x * shape.getSize().y;
-}
-
-double Rectangle::perimeter() const {
-    return 2 * (shape.getSize().x + shape.getSize().y);
+double Rectangle::Perimeter() const 
+{
+    return 2 * (m_width + m_height);
 }

@@ -3,22 +3,23 @@
 #include "Circle.h"
 #include "Config.h"
 
-Circle::Circle(sf::Vector2f center, float radius) {
-    shape.setRadius(radius);
-    shape.setPosition({ center.x - radius, center.y - radius });
-    shape.setFillColor(Config::CIRCLE_FILL_COLOR);
-    shape.setOutlineThickness(Config::CIRCLE_OUTLINE_THICKNESS);
-    shape.setOutlineColor(Config::CIRCLE_OUTLINE_COLOR);
+Circle::Circle(Point center, float radius)
+    : m_center(center), m_radius(radius) { };
+
+float Circle::GetRadius() const
+{
+    return m_radius;
 }
 
-void Circle::draw(sf::RenderWindow& window) const {
-    window.draw(shape);
+Point Circle::GetCenter() const
+{
+    return m_center;
 }
 
-double Circle::area() const {
-    return M_PI * shape.getRadius() * shape.getRadius();
+double Circle::Area() const {
+    return M_PI * m_radius * m_radius;
 }
 
-double Circle::perimeter() const {
-    return 2 * M_PI * shape.getRadius();
+double Circle::Perimeter() const {
+    return 2 * M_PI * m_radius;
 }

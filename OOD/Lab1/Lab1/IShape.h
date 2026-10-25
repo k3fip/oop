@@ -1,13 +1,14 @@
 #pragma once
 
-#include <SFML/Graphics.hpp>
+#include "Point.h"
 #include <string>
 
-class IShape {
+class IShape 
+{
+
 public:
     virtual ~IShape() = default;
 
-    virtual void draw(sf::RenderWindow& window) const = 0;
-    virtual double area() const = 0;
-    virtual double perimeter() const = 0;
+    virtual double Area() const = 0;
+    virtual double Perimeter() const = 0;
 };

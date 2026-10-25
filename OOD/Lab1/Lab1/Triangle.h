@@ -1,17 +1,22 @@
 #pragma once
 
 #include "IShape.h"
-#include <SFML/Graphics.hpp>
+#include <vector>
 
-class Triangle : public IShape {
+
+class Triangle : public IShape 
+{
+
 private:
-    sf::ConvexShape shape;
-    sf::Vector2f p1, p2, p3;
+    Point m_p1, m_p2, m_p3;
 
 public:
-    Triangle(sf::Vector2f a, sf::Vector2f b, sf::Vector2f c);
+    Triangle(Point p1, Point p2, Point p3);
 
-    void draw(sf::RenderWindow& window) const override;
-    double area() const override;
-    double perimeter() const override;
+    Point GetP1() const;
+    Point GetP2() const;
+    Point GetP3() const;
+    
+    double Area() const override;
+    double Perimeter() const override;
 };

@@ -1,11 +1,11 @@
 ﻿#include <SFML/Graphics.hpp>
-#include "ShapeAdapter.h"
+#include "App.h"
 #include "Config.h"
 #include <iostream>
 
 int main() 
 {
-    ShapeAdapter::RenderShapes();
+    App::RenderShapes();
 
     return 0;
 }
